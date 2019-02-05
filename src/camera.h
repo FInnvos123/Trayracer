@@ -16,12 +16,13 @@ class Camera
 
         void input(GLFWwindow* window);
 
-        glm::mat4& getViewMatrix() { return m_viewMatrix; }
+        glm::vec3& getPosition() { return m_position; }
+        glm::vec3& getp0() { return m_p0; }
+        glm::vec3& getp0p1() { return m_p0p1; }
+        glm::vec3& getp0p2() { return m_p0p2; }
 
     private:
         void mouseLook(GLFWwindow* window);
-
-        glm::mat4 createViewMatrix();
 
         const float M_TWOPI = M_PI * 2;
 
@@ -32,10 +33,12 @@ class Camera
         double m_mouseCenterX = 0.0;
         double m_mouseCenterY = 0.0;
 
-        glm::mat4 m_viewMatrix;
+        glm::vec3 m_position;
+        glm::vec3 m_rotation;
 
-        glm::vec3 position;
-        glm::vec3 rotation;
+        glm::vec3 m_p0;
+        glm::vec3 m_p0p1;
+        glm::vec3 m_p0p2;
 
         glm::vec3 m_forward;
         glm::vec3 m_right;

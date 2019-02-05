@@ -61,7 +61,7 @@ void Game::render(Display& display)
 {
     m_texture.bindImageTexture();
 
-    m_raytracer.dispatch(m_camera.getViewMatrix());
+    m_raytracer.dispatch(m_camera);
 
     m_texture.unbindImageTexture();
 

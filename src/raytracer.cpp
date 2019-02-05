@@ -15,9 +15,6 @@ Raytracer::Raytracer(int width, int height)
     m_workGroupSizeX = workGroupSize[0];
     m_workGroupSizeY = workGroupSize[1];
 
-    glUniform1i(m_screenWidthLocation, width);
-    glUniform1i(m_screenHeightLocation, height);
-
     m_width = width;
     m_height = height;
 
@@ -29,17 +26,28 @@ Raytracer::~Raytracer()
     glDeleteProgram(m_id);
 }
 
-void Raytracer::dispatch(glm::mat4& viewMatrix)
+void Raytracer::dispatch(Camera& cam)
 {
     glUseProgram(m_id);
-    glUniformMatrix4fv(m_viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+    loadVec3(m_camPosLocation, cam.getPosition());
+    loadVec3(m_p0Location, cam.getp0());
+    loadVec3(m_p0p1Location, cam.getp0p1());
+    loadVec3(m_p0p2Location, cam.getp0p2());
+
     glDispatchCompute(m_width / m_workGroupSizeX, m_height / m_workGroupSizeY, 1);
     glUseProgram(0);
 }
 
 void Raytracer::getUniformLocations()
 {
-    m_viewMatrixLocation = glGetUniformLocation(m_id, "view_matrix");
-    m_screenWidthLocation = glGetUniformLocation(m_id, "screen_width");
-    m_screenHeightLocation = glGetUniformLocation(m_id, "screen_height");
+    m_camPosLocation = glGetUniformLocation(m_id, "cam_pos");
+    m_p0Location = glGetUniformLocation(m_id, "p0");
+    m_p0p1Location = glGetUniformLocation(m_id, "p0p1");
+    m_p0p2Location = glGetUniformLocation(m_id, "p0p2");
+}
+
+void Raytracer::loadVec3(GLuint loc, const glm::vec3& vec)
+{
+    glUniform3f(loc, vec.x, vec.y, vec.z);
 }
