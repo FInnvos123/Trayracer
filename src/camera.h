@@ -28,7 +28,7 @@ class Camera
 
         const float m_movementSpeed = 0.1f;
         const float m_mouseSensitivity = 0.01f;
-        const float m_vertBounds = 1.5f;
+        const float m_vertBounds = 2.0f;
 
         double m_mouseCenterX = 0.0;
         double m_mouseCenterY = 0.0;

@@ -1,6 +1,7 @@
 #include "game.h"
 
 #include <glm/glm.hpp>
+#include <cstdio>
 
 Game& Game::get()
 {
@@ -22,6 +23,8 @@ void Game::runGameLoop()
 
     float timer = prevTime;
 
+    int frames, updates;
+
     glEnable(GL_TEXTURE_2D);
 
     while (!display.shouldClose()) {
@@ -31,13 +34,17 @@ void Game::runGameLoop()
 
         while (deltaTime >= 1.0) {
             update();
+            updates++;
             deltaTime--;
         }
 
         render(display);
+        frames++;
 
         if (glfwGetTime() - timer > 1.0) {
             timer++;
+            printf("FPS: %d, UPS: %d\n", frames, updates);
+            frames = updates = 0;
         }
     }
 }

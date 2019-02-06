@@ -25,6 +25,8 @@ class Raytracer
         GLuint m_p0Location = 0;
         GLuint m_p0p1Location = 0;
         GLuint m_p0p2Location = 0;
+        GLuint m_screenWidthLocation = 0;
+        GLuint m_screenHeightLocation = 0;
 
         GLuint m_workGroupSizeX = 0;
         GLuint m_workGroupSizeY = 0;

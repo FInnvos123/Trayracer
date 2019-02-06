@@ -18,6 +18,11 @@ Raytracer::Raytracer(int width, int height)
     m_width = width;
     m_height = height;
 
+    getUniformLocations();
+
+    glUniform1i(m_screenWidthLocation, m_width);
+    glUniform1i(m_screenHeightLocation, m_height);
+
     glUseProgram(0);
 }
 
@@ -45,6 +50,8 @@ void Raytracer::getUniformLocations()
     m_p0Location = glGetUniformLocation(m_id, "p0");
     m_p0p1Location = glGetUniformLocation(m_id, "p0p1");
     m_p0p2Location = glGetUniformLocation(m_id, "p0p2");
+    m_screenWidthLocation = glGetUniformLocation(m_id, "screen_width");
+    m_screenHeightLocation = glGetUniformLocation(m_id, "screen_height");
 }
 
 void Raytracer::loadVec3(GLuint loc, const glm::vec3& vec)

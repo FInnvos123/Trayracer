@@ -22,9 +22,10 @@ void Camera::update()
 
     glm::vec3 up = glm::normalize(glm::cross(m_right, m_forward));
 
-    m_p0 = m_forward - up - m_right;
-    glm::vec3 p1 = m_forward - up + m_right;
-    glm::vec3 p2 = m_forward + up - m_right;
+    glm::vec3 center = m_position + m_forward;
+    m_p0 = center - up - m_right;
+    glm::vec3 p1 = center - up + m_right;
+    glm::vec3 p2 = center + up - m_right;
 
     m_p0p1 = p1 - m_p0;
     m_p0p2 = p2 - m_p0;
