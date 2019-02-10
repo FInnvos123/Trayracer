@@ -4,7 +4,7 @@
 #define EPSILON 0.0001f
 
 #define SPHERE 0
-#define PLANE 1
+#define BOX 1
 
 layout(local_size_x = 16, local_size_y = 16) in;
 layout(rgba32f, binding = 0) uniform writeonly image2D dest_tex;
@@ -40,10 +40,10 @@ struct Sphere
     float r;
 };
 
-struct Plane
+struct Box
 {
-    vec3 n;
-    float d;
+    vec3 min;
+    vec3 max;
 };
 
 /* Object buffers */
@@ -52,7 +52,7 @@ uniform int primitiveCount;
 
 layout(std430, binding = 1) buffer primitiveBuffer { Primitive primitives[]; };
 layout(std430, binding = 2) buffer sphereBuffer { Sphere spheres[]; };
-layout(std430, binding = 3) buffer planeBuffer { Plane planes[]; };
+layout(std430, binding = 3) buffer boxBuffer { Box boxes[]; };
 
 float intersectSphere(Ray r, Sphere s)
 {
@@ -72,12 +72,28 @@ float intersectSphere(Ray r, Sphere s)
     }
 }
 
-float intersectPlane(Ray r, Plane p)
+float intersectBox(Ray r, Box b)
 {
-    float t = -dot(p.n, r.origin) + p.d;
-    t /= dot(p.n, r.dir);
-    if (t > EPSILON && t < FAR_CLIP)
-        return t;
+    float t1x = (b.min.x - r.origin.x) / r.dir.x;
+    float t2x = (b.max.x - r.origin.x) / r.dir.x;
+
+    float tmin = min(t1x, t2x);
+    float tmax = max(t1x, t2x);
+
+    float t1y = (b.min.y - r.origin.y) / r.dir.y;
+    float t2y = (b.max.y - r.origin.y) / r.dir.y;
+
+    tmin = max(tmin, min(t1y, t2y));
+    tmax = min(tmax, max(t1y, t2y));
+
+    float t1z = (b.min.z - r.origin.z) / r.dir.z;
+    float t2z = (b.max.z - r.origin.z) / r.dir.z;
+
+    tmin = max(tmin, min(t1z, t2z));
+    tmax = min(tmax, max(t1z, t2z));
+
+    if (tmax >= tmin)
+        return tmin;
     return FAR_CLIP;
 }
 
@@ -100,8 +116,8 @@ void main()
             case SPHERE:
                 t = intersectSphere(r, spheres[primitives[i].index]);
                 break;
-            case PLANE:
-                t = intersectPlane(r, planes[primitives[i].index]);
+            case BOX:
+                t = intersectBox(r, boxes[primitives[i].index]);
                 break;
         }
 
@@ -113,8 +129,8 @@ void main()
 
     if (min_t < FAR_CLIP) {
         vec3 intersection = r.origin + min_t * r.dir;
-        if (primitives[min_idx].type == PLANE)
-            color = vec4(0.5f, 0.5f, 0.5f, 1);
+        if (primitives[min_idx].type == BOX)
+            color = vec4(0, 1, 0, 1);
         else
             color = vec4(1, 0, 0, 1);
     }

@@ -10,7 +10,7 @@
 class Camera
 {
     public:
-        Camera();
+        Camera(glm::vec3 pos);
 
         void update();
 
