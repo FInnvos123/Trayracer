@@ -27,6 +27,16 @@ struct Ray
     vec3 dir;
 };
 
+struct Material
+{
+    vec4 col_diffuse;
+    vec4 col_specular;
+    float spec;
+    float refl;
+    int dielectric;
+    float ref_index;
+};
+
 struct Primitive
 {
     int type;
@@ -50,9 +60,10 @@ struct Box
 
 uniform int primitiveCount;
 
-layout(std430, binding = 1) buffer primitiveBuffer { Primitive primitives[]; };
-layout(std430, binding = 2) buffer sphereBuffer { Sphere spheres[]; };
-layout(std430, binding = 3) buffer boxBuffer { Box boxes[]; };
+layout(std430, binding = 1) buffer materialBuffer { Material materials[]; };
+layout(std430, binding = 2) buffer primitiveBuffer { Primitive primitives[]; };
+layout(std430, binding = 3) buffer sphereBuffer { Sphere spheres[]; };
+layout(std430, binding = 4) buffer boxBuffer { Box boxes[]; };
 
 float intersectSphere(Ray r, Sphere s)
 {
@@ -129,10 +140,7 @@ void main()
 
     if (min_t < FAR_CLIP) {
         vec3 intersection = r.origin + min_t * r.dir;
-        if (primitives[min_idx].type == BOX)
-            color = vec4(0, 1, 0, 1);
-        else
-            color = vec4(1, 0, 0, 1);
+        color = materials[primitives[min_idx].material].col_diffuse;
     }
 
     imageStore(dest_tex, frag_coord, color);
