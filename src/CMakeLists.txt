@@ -8,6 +8,7 @@ set(SOURCES
     quadshader.cpp
     raytracer.cpp
     camera.cpp
+    scene.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

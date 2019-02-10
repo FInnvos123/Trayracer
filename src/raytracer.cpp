@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shaderloading.h"
+#include "primitives.h"
 
 Raytracer::Raytracer(int width, int height)
     : m_id(createComputeProgram("raytracer.comp"))
@@ -14,7 +15,6 @@ Raytracer::Raytracer(int width, int height)
     glGetProgramiv(m_id, GL_COMPUTE_WORK_GROUP_SIZE, workGroupSize);
     m_workGroupSizeX = workGroupSize[0];
     m_workGroupSizeY = workGroupSize[1];
-
     m_width = width;
     m_height = height;
 
@@ -22,6 +22,10 @@ Raytracer::Raytracer(int width, int height)
 
     glUniform1i(m_screenWidthLocation, m_width);
     glUniform1i(m_screenHeightLocation, m_height);
+
+    for (int i = 0; i < (int)PrimitiveType::count; i++) {
+        glGenBuffers(1, &m_buffers[i]);
+    }
 
     glUseProgram(0);
 }
@@ -54,7 +58,59 @@ void Raytracer::getUniformLocations()
     m_screenHeightLocation = glGetUniformLocation(m_id, "screen_height");
 }
 
+void* Raytracer::mapBuffer(GLuint bufID, GLuint layout,
+                           size_t bufSize, size_t elemSize)
+{
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufID);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, layout, bufID);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, bufSize*elemSize,
+                 nullptr, GL_STATIC_DRAW);
+    return glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, bufSize*elemSize,
+                            GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+}
+
 void Raytracer::loadVec3(GLuint loc, const glm::vec3& vec)
 {
     glUniform3f(loc, vec.x, vec.y, vec.z);
+}
+
+void Raytracer::loadScene(Scene& scene)
+{
+    glUseProgram(m_id);
+
+    size_t primitiveCount = scene.getPrimitiveCount(PrimitiveType::primitive);
+    if (primitiveCount > 0) {
+        struct Primitive* primitives =
+            (struct Primitive*) mapBuffer(m_buffers[(int)PrimitiveType::primitive], 1,
+                                          primitiveCount, sizeof(Primitive));
+        for (size_t i = 0; i < primitiveCount; i++) {
+            primitives[i] = *(struct Primitive*) scene.getPrimitive(PrimitiveType::primitive, i);
+        }
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+        glUniform1i(glGetUniformLocation(m_id, "primitiveCount"), (GLuint)primitiveCount);
+    }
+
+    size_t sphereCount = scene.getPrimitiveCount(PrimitiveType::sphere);
+    if (sphereCount > 0) {
+        struct Sphere* spheres =
+            (struct Sphere*) mapBuffer(m_buffers[(int)PrimitiveType::sphere], 2,
+                                       sphereCount, sizeof(Sphere));
+        for (size_t i = 0; i < sphereCount; i++) {
+            spheres[i] = *(struct Sphere*) scene.getPrimitive(PrimitiveType::sphere, i);
+        }
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    }
+
+    size_t planeCount = scene.getPrimitiveCount(PrimitiveType::plane);
+    if (planeCount > 0) {
+        struct Plane* planes =
+            (struct Plane*) mapBuffer(m_buffers[(int)PrimitiveType::plane], 3,
+                                      planeCount, sizeof(Plane));
+        for (size_t i = 0; i < planeCount; i++) {
+            planes[i] = *(struct Plane*) scene.getPrimitive(PrimitiveType::plane, i);
+        }
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    }
+
+    glUseProgram(0);
 }

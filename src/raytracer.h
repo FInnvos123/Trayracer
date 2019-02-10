@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "camera.h"
+#include "scene.h"
 
 class Raytracer
 {
@@ -14,8 +15,13 @@ class Raytracer
 
         void dispatch(Camera& cam);
 
+        void loadScene(Scene& scene);
+
     private:
         void getUniformLocations();
+
+        void* mapBuffer(GLuint bufID, GLuint layout,
+                       size_t bufSize, size_t elemSize);
 
         void loadVec3(GLuint loc, const glm::vec3& vec);
 
@@ -33,6 +39,8 @@ class Raytracer
 
         int m_width;
         int m_height;
+
+        GLuint m_buffers[(int)PrimitiveType::count];
 };
 
 #endif /* ifndef RAYTRACER_H */

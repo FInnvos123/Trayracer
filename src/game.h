@@ -8,6 +8,7 @@
 #include "quadshader.h"
 #include "raytracer.h"
 #include "camera.h"
+#include "scene.h"
 
 class Game : public Singleton
 {
@@ -25,6 +26,8 @@ class Game : public Singleton
 
         void render(Display& display);
 
+        void loadScene();
+
         const float m_upsLimit = 1.0 / 60.0;
 
         Texture m_texture;
@@ -32,6 +35,7 @@ class Game : public Singleton
         Quadshader m_quadshader;
         Raytracer m_raytracer;
         Camera m_camera;
+        Scene m_scene;
 };
 
 #endif /* ifndef GAME_H */
