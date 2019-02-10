@@ -89,10 +89,22 @@ void Raytracer::loadScene(Scene& scene)
         glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     }
 
+    size_t pointlightCount = scene.getPrimitiveCount(PrimitiveType::pointlight);
+    if (pointlightCount > 0) {
+        struct Pointlight* pointlights =
+            (struct Pointlight*) mapBuffer(m_buffers[(int)PrimitiveType::pointlight], 2,
+                                           pointlightCount, sizeof(Pointlight));
+        for (size_t i = 0; i < pointlightCount; i++) {
+            pointlights[i] = *(struct Pointlight*) scene.getPrimitive(PrimitiveType::pointlight, i);
+        }
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+        glUniform1i(glGetUniformLocation(m_id, "pointlightCount"), (GLuint)pointlightCount);
+    }
+
     size_t primitiveCount = scene.getPrimitiveCount(PrimitiveType::primitive);
     if (primitiveCount > 0) {
         struct Primitive* primitives =
-            (struct Primitive*) mapBuffer(m_buffers[(int)PrimitiveType::primitive], 2,
+            (struct Primitive*) mapBuffer(m_buffers[(int)PrimitiveType::primitive], 3,
                                           primitiveCount, sizeof(Primitive));
         for (size_t i = 0; i < primitiveCount; i++) {
             primitives[i] = *(struct Primitive*) scene.getPrimitive(PrimitiveType::primitive, i);
@@ -104,7 +116,7 @@ void Raytracer::loadScene(Scene& scene)
     size_t sphereCount = scene.getPrimitiveCount(PrimitiveType::sphere);
     if (sphereCount > 0) {
         struct Sphere* spheres =
-            (struct Sphere*) mapBuffer(m_buffers[(int)PrimitiveType::sphere], 3,
+            (struct Sphere*) mapBuffer(m_buffers[(int)PrimitiveType::sphere], 4,
                                        sphereCount, sizeof(Sphere));
         for (size_t i = 0; i < sphereCount; i++) {
             spheres[i] = *(struct Sphere*) scene.getPrimitive(PrimitiveType::sphere, i);
@@ -115,7 +127,7 @@ void Raytracer::loadScene(Scene& scene)
     size_t boxCount = scene.getPrimitiveCount(PrimitiveType::box);
     if (boxCount > 0) {
         struct Box* boxes =
-            (struct Box*) mapBuffer(m_buffers[(int)PrimitiveType::box], 4,
+            (struct Box*) mapBuffer(m_buffers[(int)PrimitiveType::box], 5,
                                       boxCount, sizeof(Box));
         for (size_t i = 0; i < boxCount; i++) {
             boxes[i] = *(struct Box*) scene.getPrimitive(PrimitiveType::box, i);

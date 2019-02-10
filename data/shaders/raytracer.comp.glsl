@@ -37,6 +37,12 @@ struct Material
     float ref_index;
 };
 
+struct Pointlight
+{
+    vec3 pos;
+    vec4 color;
+};
+
 struct Primitive
 {
     int type;
@@ -59,11 +65,13 @@ struct Box
 /* Object buffers */
 
 uniform int primitiveCount;
+uniform int pointlightCount;
 
 layout(std430, binding = 1) buffer materialBuffer { Material materials[]; };
-layout(std430, binding = 2) buffer primitiveBuffer { Primitive primitives[]; };
-layout(std430, binding = 3) buffer sphereBuffer { Sphere spheres[]; };
-layout(std430, binding = 4) buffer boxBuffer { Box boxes[]; };
+layout(std430, binding = 2) buffer pointlightsBuffer { Pointlight pointlights[]; };
+layout(std430, binding = 3) buffer primitiveBuffer { Primitive primitives[]; };
+layout(std430, binding = 4) buffer sphereBuffer { Sphere spheres[]; };
+layout(std430, binding = 5) buffer boxBuffer { Box boxes[]; };
 
 float intersectSphere(Ray r, Sphere s)
 {
@@ -108,6 +116,76 @@ float intersectBox(Ray r, Box b)
     return FAR_CLIP;
 }
 
+vec3 calcNormal(int prim, vec3 intersection)
+{
+    vec3 n;
+    int obj = primitives[prim].index;
+    switch (primitives[prim].type) {
+        case SPHERE:
+            n = normalize(intersection - spheres[obj].pos);
+            break;
+        case BOX:
+            Box b = boxes[obj];
+            vec3 c = (b.min + b.max) * 0.5f;
+            vec3 size = vec3(abs(b.max.x - b.min.x),
+                             abs(b.max.y - b.min.y),
+                             abs(b.max.z - b.min.z));
+            vec3 p = intersection - c;
+            float dist = (size.x - abs(p.x));
+            float min = dist;
+            n = vec3(1, 0, 0) * sign(p.x);
+            dist = (size.y - abs(p.y));
+            if (dist < min) {
+                min = dist;
+                n = vec3(0, 1, 0) * sign(p.y);
+            }
+            dist = (size.z - abs(p.z));
+            if (dist < min)
+                n = vec3(0, 0, 1) * sign(p.z);
+            break;
+    }
+    return n;
+}
+
+vec4 calcLighting(int prim, vec3 ray_o, vec3 intersection)
+{
+    Material m = materials[primitives[prim].material];
+    vec4 color = m.col_diffuse * 0.2f;
+    vec3 N = calcNormal(prim, intersection);
+    for (int i = 0; i < pointlightCount; i++) {
+        vec3 L = pointlights[i].pos - intersection;
+        float dist = length(L);
+        if (dot(N, L) < 0)
+            break;
+        Ray r = Ray(intersection, normalize(L));
+        bool visible = true;
+        for (int j = 0; j < primitiveCount; j++) {
+            float t;
+            switch (primitives[j].type) {
+                case SPHERE:
+                    t = intersectSphere(r, spheres[primitives[j].index]);
+                    break;
+                case BOX:
+                    t = intersectBox(r, boxes[primitives[j].index]);
+                    break;
+            }
+            if (t > EPSILON && t < FAR_CLIP && t < dist) {
+                visible = false;
+                break;
+            }
+        }
+        if (visible) {
+            float att = 1 / (dist * dist);
+            vec3 V = normalize(ray_o - intersection);
+            vec3 R = normalize(reflect(-L, N));
+            color += (1-m.spec) * dot(N, L) * m.col_diffuse * pointlights[i].color * att;
+            color += m.spec * pow(max(0, dot(V, R)), 34) * m.col_specular;
+        }
+    }
+
+    return color;
+}
+
 void main()
 {
     ivec2 frag_coord = ivec2(gl_GlobalInvocationID.xy);
@@ -140,7 +218,7 @@ void main()
 
     if (min_t < FAR_CLIP) {
         vec3 intersection = r.origin + min_t * r.dir;
-        color = materials[primitives[min_idx].material].col_diffuse;
+        color = calcLighting(min_idx, r.origin, intersection);
     }
 
     imageStore(dest_tex, frag_coord, color);

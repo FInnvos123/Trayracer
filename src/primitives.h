@@ -6,6 +6,7 @@
 enum class PrimitiveType
 {
     material,
+    pointlight,
     primitive,
     sphere,
     box,
@@ -30,6 +31,15 @@ struct Material
           refl(r),
           dielectric(d),
           ref_index(ri)
+    {}
+};
+
+struct Pointlight
+{
+    glm::vec4 pos;
+    glm::vec4 col;
+    Pointlight(glm::vec3 position, glm::vec4 color) : pos(glm::vec4(position, 0)),
+                                                      col(color)
     {}
 };
 
