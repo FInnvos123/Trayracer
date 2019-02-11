@@ -1,6 +1,6 @@
 #version 450
 
-#define FAR_CLIP 10000.0f
+#define FAR_CLIP 100.0f
 #define EPSILON 0.0001f
 
 #define SPHERE 0

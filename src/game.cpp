@@ -115,21 +115,24 @@ void Game::loadScene()
     m_scene.addPrimitive(PrimitiveType::box,
                          new Box(glm::vec3(-5, 0, -5), glm::vec3(5, -1, 5)));
     m_scene.addPrimitive(PrimitiveType::material,
+                         new Material(glm::vec4(0.93f, 0.96f, 0.93f, 1),
+                                      glm::vec4(glm::vec3(0.9f), 1), 0.8f));
+
+    m_scene.addPrimitive(PrimitiveType::primitive,
+                         new Primitive(1, 3, 3));
+    m_scene.addPrimitive(PrimitiveType::box,
+                         new Box(glm::vec3(-5, 10, -5), glm::vec3(5, 11, 5)));
+    m_scene.addPrimitive(PrimitiveType::material,
                          new Material(glm::vec4(0.54f, 0.56f, 0.53f, 1),
                                       glm::vec4(glm::vec3(0.9f), 1)));
 
     m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(1, 3, 2));
-    m_scene.addPrimitive(PrimitiveType::box,
-                         new Box(glm::vec3(-5, 10, -5), glm::vec3(5, 11, 5)));
-
-    m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(1, 4, 2));
+                         new Primitive(1, 4, 3));
     m_scene.addPrimitive(PrimitiveType::box,
                          new Box(glm::vec3(-5, 0, -5), glm::vec3(5, 10, -6)));
 
     m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(0, 0, 3));
+                         new Primitive(0, 0, 4));
     m_scene.addPrimitive(PrimitiveType::sphere,
                          new Sphere(glm::vec3(0, 4, -2), 1));
     m_scene.addPrimitive(PrimitiveType::material,
@@ -137,7 +140,7 @@ void Game::loadScene()
                                       glm::vec4(glm::vec3(0.9f), 1), 0.4f));
 
     m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(0, 1, 4));
+                         new Primitive(0, 1, 5));
     m_scene.addPrimitive(PrimitiveType::sphere,
                          new Sphere(glm::vec3(-3, 2, -1), 1));
     m_scene.addPrimitive(PrimitiveType::material,
@@ -145,12 +148,20 @@ void Game::loadScene()
                                       glm::vec4(glm::vec3(0.9f), 1), 0.74f));
 
     m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(0, 2, 5));
+                         new Primitive(0, 2, 6));
     m_scene.addPrimitive(PrimitiveType::sphere,
                          new Sphere(glm::vec3(3, 2, -3), 1));
     m_scene.addPrimitive(PrimitiveType::material,
                          new Material(glm::vec4(0.03f, 0.05f, 0.64f, 1),
                                       glm::vec4(glm::vec3(0.9f), 1), 0.9f));
+
+    m_scene.addPrimitive(PrimitiveType::primitive,
+                         new Primitive(1, 5, 7));
+    m_scene.addPrimitive(PrimitiveType::box,
+                         new Box(glm::vec3(0, 0, 2), glm::vec3(1, 1, 1)));
+    m_scene.addPrimitive(PrimitiveType::material,
+                         new Material(glm::vec4(0.43f, 0.38f, 0.72f, 1),
+                                      glm::vec4(0.82f, 0.77f, 0.91f, 1), 0.7f));
 
     m_scene.addPrimitive(PrimitiveType::pointlight,
                          new Pointlight(glm::vec3(-2, 4, 5),
