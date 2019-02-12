@@ -20,16 +20,14 @@ struct Material
     glm::vec4 col_specular;
     float spec;
     float refl;
-    int dielectric;
     float ref_index;
+    float padding;
     Material(glm::vec4 c_diff, glm::vec4 c_spec,
-             float s = 0, float r = 0,
-             int d = 0, float ri = 0)
+             float s = 0, float r = 0, float ri = 0)
         : col_diffuse(c_diff),
           col_specular(c_spec),
           spec(s),
           refl(r),
-          dielectric(d),
           ref_index(ri)
     {}
 };

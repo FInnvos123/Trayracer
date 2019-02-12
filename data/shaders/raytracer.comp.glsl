@@ -6,6 +6,8 @@
 #define SPHERE 0
 #define BOX 1
 
+#define MAX_REFLECTIONS 8
+
 layout(local_size_x = 16, local_size_y = 16) in;
 layout(rgba32f, binding = 0) uniform writeonly image2D dest_tex;
 
@@ -33,7 +35,6 @@ struct Material
     vec4 col_specular;
     float spec;
     float refl;
-    int dielectric;
     float ref_index;
 };
 
@@ -197,28 +198,40 @@ void main()
 
     Ray r = Ray(cam_pos, ray_dir);
 
-    float min_t = FAR_CLIP;
-    int min_idx = 0;
-    for (int i = 0; i < primitiveCount; i++) {
-        float t = FAR_CLIP;
-        switch (primitives[i].type) {
-            case SPHERE:
-                t = intersectSphere(r, spheres[primitives[i].index]);
-                break;
-            case BOX:
-                t = intersectBox(r, boxes[primitives[i].index]);
-                break;
+    for (int j = 0; j < MAX_REFLECTIONS; j++) {
+        float min_t = FAR_CLIP;
+        int min_idx = 0;
+        for (int i = 0; i < primitiveCount; i++) {
+            float t = FAR_CLIP;
+            switch (primitives[i].type) {
+                case SPHERE:
+                    t = intersectSphere(r, spheres[primitives[i].index]);
+                    break;
+                case BOX:
+                        t = intersectBox(r, boxes[primitives[i].index]);
+                    break;
+            }
+
+            if (t < min_t + EPSILON && t > EPSILON && t < FAR_CLIP) {
+                min_t = t;
+                min_idx = i;
+            }
         }
 
-        if (t < min_t + EPSILON && t > EPSILON && t < FAR_CLIP) {
-            min_t = t;
-            min_idx = i;
+        if (min_t < FAR_CLIP) {
+            vec3 intersection = r.origin + min_t * r.dir;
+            float refl = materials[min_idx].refl;
+            if (refl == 0) {
+                color += calcLighting(min_idx, r.origin, intersection);
+                break;
+            }
+            color += materials[min_idx].refl * calcLighting(min_idx, r.origin, intersection);
+            r.origin = intersection;
+            r.dir = normalize(reflect(r.dir, calcNormal(min_idx, intersection)));
         }
-    }
-
-    if (min_t < FAR_CLIP) {
-        vec3 intersection = r.origin + min_t * r.dir;
-        color = calcLighting(min_idx, r.origin, intersection);
+        else {
+            break;
+        }
     }
 
     imageStore(dest_tex, frag_coord, color);
