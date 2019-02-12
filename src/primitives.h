@@ -21,7 +21,7 @@ struct Material
     float spec;
     float refl;
     float ref_index;
-    float padding;
+    float pad;
     Material(glm::vec4 c_diff, glm::vec4 c_spec,
              float s = 0, float r = 0, float ri = 0)
         : col_diffuse(c_diff),

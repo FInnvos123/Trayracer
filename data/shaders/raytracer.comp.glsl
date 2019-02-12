@@ -220,12 +220,12 @@ void main()
 
         if (min_t < FAR_CLIP) {
             vec3 intersection = r.origin + min_t * r.dir;
-            float refl = materials[min_idx].refl;
+            float refl = materials[primitives[min_idx].material].refl;
             if (refl == 0) {
                 color += calcLighting(min_idx, r.origin, intersection);
                 break;
             }
-            color += materials[min_idx].refl * calcLighting(min_idx, r.origin, intersection);
+            color += refl * calcLighting(min_idx, r.origin, intersection);
             r.origin = intersection;
             r.dir = normalize(reflect(r.dir, calcNormal(min_idx, intersection)));
         }
