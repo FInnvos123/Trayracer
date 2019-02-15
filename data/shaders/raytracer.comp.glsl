@@ -4,7 +4,7 @@
 #define EPSILON 0.0001f
 
 #define SPHERE 0
-#define BOX 1
+#define TRIANGLE 1
 
 #define MAX_REFLECTIONS 8
 
@@ -57,10 +57,12 @@ struct Sphere
     float r;
 };
 
-struct Box
+struct Triangle
 {
-    vec3 min;
-    vec3 max;
+    vec3 v0;
+    vec3 v1;
+    vec3 v2;
+    vec3 n;
 };
 
 /* Object buffers */
@@ -72,7 +74,7 @@ layout(std430, binding = 1) buffer materialBuffer { Material materials[]; };
 layout(std430, binding = 2) buffer pointlightsBuffer { Pointlight pointlights[]; };
 layout(std430, binding = 3) buffer primitiveBuffer { Primitive primitives[]; };
 layout(std430, binding = 4) buffer sphereBuffer { Sphere spheres[]; };
-layout(std430, binding = 5) buffer boxBuffer { Box boxes[]; };
+layout(std430, binding = 5) buffer trisBuffer { Triangle tris[]; };
 
 float intersectSphere(Ray r, Sphere s)
 {
@@ -92,29 +94,26 @@ float intersectSphere(Ray r, Sphere s)
     }
 }
 
-float intersectBox(Ray r, Box b)
+float intersectTriangle(Ray r, Triangle t)
 {
-    float t1x = (b.min.x - r.origin.x) / r.dir.x;
-    float t2x = (b.max.x - r.origin.x) / r.dir.x;
+    /* Möller-Trumbore intersection algorithm */
 
-    float tmin = min(t1x, t2x);
-    float tmax = max(t1x, t2x);
+    vec3 e1 = t.v1 - t.v0;
+    vec3 e2 = t.v2 - t.v0;
+    vec3 T = r.origin - t.v0;
+    vec3 p = cross(r.dir, e2);
+    float f = dot(p, e1);
 
-    float t1y = (b.min.y - r.origin.y) / r.dir.y;
-    float t2y = (b.max.y - r.origin.y) / r.dir.y;
+    float u = dot(p, T) / f;
+    if (u < -EPSILON || u > 1.0f)
+        return FAR_CLIP;
 
-    tmin = max(tmin, min(t1y, t2y));
-    tmax = min(tmax, max(t1y, t2y));
+    vec3 q = cross(T, e1);
+    float v = dot(q, r.dir) / f;
+    if (v < -EPSILON || u+v > 1.0f)
+        return FAR_CLIP;
 
-    float t1z = (b.min.z - r.origin.z) / r.dir.z;
-    float t2z = (b.max.z - r.origin.z) / r.dir.z;
-
-    tmin = max(tmin, min(t1z, t2z));
-    tmax = min(tmax, max(t1z, t2z));
-
-    if (tmax >= tmin)
-        return tmin;
-    return FAR_CLIP;
+    return dot(q, e2) / f;
 }
 
 vec3 calcNormal(int prim, vec3 intersection)
@@ -125,24 +124,8 @@ vec3 calcNormal(int prim, vec3 intersection)
         case SPHERE:
             n = normalize(intersection - spheres[obj].pos);
             break;
-        case BOX:
-            Box b = boxes[obj];
-            vec3 c = (b.min + b.max) * 0.5f;
-            vec3 size = vec3(abs(b.max.x - b.min.x),
-                             abs(b.max.y - b.min.y),
-                             abs(b.max.z - b.min.z));
-            vec3 p = intersection - c;
-            float dist = (size.x - abs(p.x));
-            float min = dist;
-            n = vec3(1, 0, 0) * sign(p.x);
-            dist = (size.y - abs(p.y));
-            if (dist < min) {
-                min = dist;
-                n = vec3(0, 1, 0) * sign(p.y);
-            }
-            dist = (size.z - abs(p.z));
-            if (dist < min)
-                n = vec3(0, 0, 1) * sign(p.z);
+        case TRIANGLE:
+            n = tris[obj].n;
             break;
     }
     return n;
@@ -166,8 +149,8 @@ vec4 calcLighting(int prim, vec3 ray_o, vec3 intersection)
                 case SPHERE:
                     t = intersectSphere(r, spheres[primitives[j].index]);
                     break;
-                case BOX:
-                    t = intersectBox(r, boxes[primitives[j].index]);
+                case TRIANGLE:
+                    t = intersectTriangle(r, tris[primitives[j].index]);
                     break;
             }
             if (t > EPSILON && t < FAR_CLIP && t < dist) {
@@ -207,9 +190,8 @@ void main()
                 case SPHERE:
                     t = intersectSphere(r, spheres[primitives[i].index]);
                     break;
-                case BOX:
-                        t = intersectBox(r, boxes[primitives[i].index]);
-                    break;
+                case TRIANGLE:
+                    t = intersectTriangle(r, tris[primitives[i].index]);
             }
 
             if (t < min_t + EPSILON && t > EPSILON && t < FAR_CLIP) {

@@ -124,13 +124,13 @@ void Raytracer::loadScene(Scene& scene)
         glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     }
 
-    size_t boxCount = scene.getPrimitiveCount(PrimitiveType::box);
-    if (boxCount > 0) {
-        struct Box* boxes =
-            (struct Box*) mapBuffer(m_buffers[(int)PrimitiveType::box], 5,
-                                      boxCount, sizeof(Box));
-        for (size_t i = 0; i < boxCount; i++) {
-            boxes[i] = *(struct Box*) scene.getPrimitive(PrimitiveType::box, i);
+    size_t trisCount = scene.getPrimitiveCount(PrimitiveType::triangle);
+    if (trisCount > 0) {
+        struct Triangle* tris =
+            (struct Triangle*) mapBuffer(m_buffers[(int)PrimitiveType::triangle], 5,
+                                         trisCount, sizeof(Triangle));
+        for (size_t i = 0; i < trisCount; i++) {
+            tris[i] = *(struct Triangle*) scene.getPrimitive(PrimitiveType::triangle, i);
         }
         glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     }
