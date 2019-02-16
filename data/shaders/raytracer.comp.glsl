@@ -181,6 +181,8 @@ void main()
 
     Ray r = Ray(cam_pos, ray_dir);
 
+    vec4 col_ref = vec4(0);
+    Material m_first;
     for (int j = 0; j < MAX_REFLECTIONS; j++) {
         float min_t = FAR_CLIP;
         int min_idx = 0;
@@ -202,12 +204,18 @@ void main()
 
         if (min_t < FAR_CLIP) {
             vec3 intersection = r.origin + min_t * r.dir;
-            float refl = materials[primitives[min_idx].material].refl;
-            if (refl == 0) {
-                color += calcLighting(min_idx, r.origin, intersection);
-                break;
+
+            if (j == 0) {
+                m_first = materials[primitives[min_idx].material];
+                color = calcLighting(min_idx, r.origin, intersection);
+                if (m_first.refl == 0)
+                    break;
+            } else {
+                col_ref += calcLighting(min_idx, r.origin, intersection);
+                if (materials[primitives[min_idx].material].refl == 0)
+                    break;
             }
-            color += refl * calcLighting(min_idx, r.origin, intersection);
+
             r.origin = intersection;
             r.dir = normalize(reflect(r.dir, calcNormal(min_idx, intersection)));
         }
@@ -215,6 +223,8 @@ void main()
             break;
         }
     }
+
+    color = (1-m_first.refl) * color + m_first.refl * col_ref;
 
     imageStore(dest_tex, frag_coord, color);
 }

@@ -103,7 +103,7 @@ void Game::loadScene()
 
     m_scene.addSphere(new Sphere(glm::vec3(0, 6, 0), 1),
                       new Material(glm::vec4(0.44f, 0.47f, 0.45f, 1),
-                                   glm::vec4(0.84f, 0.87f, 0.85f, 1), 0.67f, 0.83f));
+                                   glm::vec4(0.84f, 0.87f, 0.85f, 1), 0.67f, 0.43f));
 
     std::vector<GLfloat> verts = {-5, 0, -5, 5, 0, -5, -5, 10, -5,
                                   5, 0, -5, 5, 10, -5, -5, 10, -5,
@@ -141,8 +141,8 @@ void Game::loadScene()
     norms = {0, 1, 0, 0, 1, 0};
 
     m_scene.addPolygon(verts, norms,
-                       new Material(glm::vec4(0.68f, 0.63f, 0.64f, 1),
-                                    glm::vec4(0.86f, 0.84f, 0.87f, 1), 0.6f, 0.6f));
+                       new Material(glm::vec4(0.84f, 0.87f, 0.85f, 1),
+                                    glm::vec4(0.86f, 0.84f, 0.87f, 1), 0.6f, 0.1f));
 
     m_raytracer.loadScene(m_scene);
 }
