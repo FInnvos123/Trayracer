@@ -71,12 +71,9 @@ struct Triangle
     float p3;
     glm::vec3 n;
     float p4;
-    Triangle(glm::vec3 vert0, glm::vec3 vert1, glm::vec3 vert2) : v0(vert0),
-                                                                  v1(vert1),
-                                                                  v2(vert2)
-    {
-        n = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-    }
+    Triangle(glm::vec3 vert0, glm::vec3 vert1, glm::vec3 vert2, glm::vec3 norm)
+        : v0(vert0), v1(vert1), v2(vert2), n(norm)
+    {}
 };
 
 #endif /* ifndef PRIMITIVES_H */

@@ -92,46 +92,57 @@ void Game::render(Display& display)
 
 void Game::loadScene()
 {
-    m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(0, 0, 0));
-    m_scene.addPrimitive(PrimitiveType::sphere,
-                         new Sphere(glm::vec3(0, 3, -2), 1));
-    m_scene.addPrimitive(PrimitiveType::material,
-                         new Material(glm::vec4(0.03f, 0.58f, 0.04f, 1),
-                                      glm::vec4(glm::vec3(0.9f), 1), 0.4f));
+    m_scene.addSphere(new Sphere(glm::vec3(0, 3, 0), 1),
+                      new Material(glm::vec4(0.03f, 0.58f, 0.04f, 1),
+                                   glm::vec4(glm::vec3(0.9f), 1), 0.4f));
 
-    m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(0, 1, 1));
-    m_scene.addPrimitive(PrimitiveType::sphere,
-                         new Sphere(glm::vec3(-3, 2, -1), 1));
-    m_scene.addPrimitive(PrimitiveType::material,
-                         new Material(glm::vec4(0.53f, 0.03f, 0.04f, 1),
-                                      glm::vec4(glm::vec3(0.9f), 1), 0.74f));
+    m_scene.addSphere(new Sphere(glm::vec3(-3, 2, -1), 1),
+                      new Material(glm::vec4(0.53f, 0.03f, 0.04f, 1),
+                                   glm::vec4(glm::vec3(0.9f), 1), 0.74f));
 
-    m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(0, 2, 2));
-    m_scene.addPrimitive(PrimitiveType::sphere,
-                         new Sphere(glm::vec3(3, 2, -3), 1));
-    m_scene.addPrimitive(PrimitiveType::material,
-                         new Material(glm::vec4(0.03f, 0.05f, 0.64f, 1),
-                                      glm::vec4(glm::vec3(0.9f), 1), 0.9f));
 
-    m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(0, 3, 3));
-    m_scene.addPrimitive(PrimitiveType::sphere,
-                         new Sphere(glm::vec3(0, 6, 0), 1));
-    m_scene.addPrimitive(PrimitiveType::material,
-                         new Material(glm::vec4(0.44f, 0.47f, 0.45f, 1),
-                                      glm::vec4(0.84f, 0.87f, 0.85f, 1), 0.67f, 0.83f));
+    m_scene.addSphere(new Sphere(glm::vec3(0, 6, 0), 1),
+                      new Material(glm::vec4(0.44f, 0.47f, 0.45f, 1),
+                                   glm::vec4(0.84f, 0.87f, 0.85f, 1), 0.67f, 0.83f));
 
-    m_scene.addPrimitive(PrimitiveType::primitive,
-                         new Primitive(1, 0, 2));
-    m_scene.addPrimitive(PrimitiveType::triangle,
-                         new Triangle(glm::vec3(-2, -1, -5), glm::vec3(2, -1, -5), glm::vec3(0, 3, -5)));
+    std::vector<GLfloat> verts = {-5, 0, -5, 5, 0, -5, -5, 10, -5,
+                                  5, 0, -5, 5, 10, -5, -5, 10, -5,
+                                  -5, 10, 5, 5, 10, 5, -5, 10, -5,
+                                  5, 10, 5, 5, 10, -5, -5, 10, -5};
+    std::vector<GLfloat> norms = {0, 0, 1, 0, 0, 1,
+                                  0, -1, 0, 0, -1, 0};
+
+    m_scene.addPolygon(verts, norms,
+                       new Material(glm::vec4(1),
+                                    glm::vec4(1)));
+
+    verts = {-5, 0, 5, -5, 0, -5, -5, 10, 5,
+             -5, 0, -5, -5, 10, -5, -5, 10, 5};
+    norms = {1, 0, 0, 1, 0, 0};
+
+    m_scene.addPolygon(verts, norms,
+                       new Material(glm::vec4(0.84f, 0.21f, 0.18f, 1),
+                                    glm::vec4(0.85f, 0.74f, 0.73f, 1)));
 
     m_scene.addPrimitive(PrimitiveType::pointlight,
-                         new Pointlight(glm::vec3(-2, 4, 5),
-                                        glm::vec4(5, 5, 5, 1)));
+                         new Pointlight(glm::vec3(-1, 4, 4),
+                                        glm::vec4(4, 4, 4, 1)));
+
+    verts = {5, 0, 5, 5, 0, -5, 5, 10, 5,
+             5, 0, -5, 5, 10, -5, 5, 10, 5};
+    norms = {-1, 0, 0, -1, 0, 0};
+
+    m_scene.addPolygon(verts, norms,
+                       new Material(glm::vec4(0.18f, 0.84f, 0.21f, 1),
+                                    glm::vec4(0.73f, 0.74f, 0.85f, 1)));
+
+    verts = {-5, 0, 5, 5, 0, 5, -5, 0, -5,
+             5, 0, 5, 5, 0, -5, -5, 0, -5};
+    norms = {0, 1, 0, 0, 1, 0};
+
+    m_scene.addPolygon(verts, norms,
+                       new Material(glm::vec4(0.68f, 0.63f, 0.64f, 1),
+                                    glm::vec4(0.86f, 0.84f, 0.87f, 1), 0.6f, 0.6f));
 
     m_raytracer.loadScene(m_scene);
 }
