@@ -13,7 +13,7 @@ Display::Display()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    m_window = glfwCreateWindow(m_width, m_height, "Raytracer", NULL, NULL);
+    m_window = glfwCreateWindow(m_width, m_height, "Trayracer", NULL, NULL);
 
     if (!m_window) {
         printf("Failed to create window\n");
